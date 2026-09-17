@@ -1,0 +1,28 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'io.ossrs.djidemo'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'io.ossrs.djidemo'
+        minSdk 24
+        // Target API 36: required for new Google Play apps since 2026-08-31.
+        targetSdk 36
+        versionCode 1
+        // Keep the displayed patch number aligned with versionCode (William's convention).
+        versionName "1.0.1"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.core.ktx
+}
