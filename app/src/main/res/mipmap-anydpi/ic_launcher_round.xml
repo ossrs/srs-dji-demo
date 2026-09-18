@@ -1,0 +1,86 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M24,0 L84,0 A24,24 0 0 1 108,24 L108,84 A24,24 0 0 1 84,108 L24,108 A24,24 0 0 1 0,84 L0,24 A24,24 0 0 1 24,0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="54"
+                android:centerY="36.7"
+                android:gradientRadius="86.4">
+                <item android:offset="0" android:color="#FF1D4166" />
+                <item android:offset="1" android:color="#FF070D19" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.93"
+        android:scaleY="0.93">
+        <!-- aircraft: rotor bars -->
+        <path
+            android:pathData="M31,30 L45,30"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="3.6"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M63,30 L77,30"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="3.6"
+            android:strokeLineCap="round" />
+        <!-- aircraft: arms -->
+        <path
+            android:pathData="M38,30 L47,36"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M70,30 L61,36"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round" />
+        <!-- aircraft: body -->
+        <path
+            android:pathData="M49,35 L59,35 A3,3 0 0 1 62,38 L62,41 A3,3 0 0 1 59,44 L49,44 A3,3 0 0 1 46,41 L46,38 A3,3 0 0 1 49,35 Z"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="2.8"
+            android:strokeLineJoin="round" />
+        <!-- aircraft: gimbal camera, the H.264 source -->
+        <path
+            android:pathData="M51.6,46.6 a2.4,2.4 0 1,0 4.8,0 a2.4,2.4 0 1,0 -4.8,0 Z"
+            android:fillColor="#FF67E8F9" />
+        <!-- the stream, flowing down -->
+        <path
+            android:pathData="M45,53 L54,60.5 L63,53"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="3.2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M45,63 L54,70.5 L63,63"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="3.2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <!-- the SRS server -->
+        <path
+            android:pathData="M42,73 L66,73 A3,3 0 0 1 69,76 L69,82 A3,3 0 0 1 66,85 L42,85 A3,3 0 0 1 39,82 L39,76 A3,3 0 0 1 42,73 Z"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="2.8"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M39,79 L69,79"
+            android:strokeColor="#FF22D3EE"
+            android:strokeWidth="2" />
+        <path
+            android:pathData="M43.3,76 a1.7,1.7 0 1,0 3.4,0 a1.7,1.7 0 1,0 -3.4,0 Z"
+            android:fillColor="#FF67E8F9" />
+        <path
+            android:pathData="M43.3,82 a1.7,1.7 0 1,0 3.4,0 a1.7,1.7 0 1,0 -3.4,0 Z"
+            android:fillColor="#FF67E8F9" />
+    </group>
+</vector>
