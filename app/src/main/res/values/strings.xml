@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">SRS DJI Demo</string>
-    <string name="hello_world">Hello, World!</string>
+
+    <string name="publish_url_hint">rtmp://host:1935/live/livestream</string>
+    <string name="publish_select">Select</string>
+    <string name="publish_select_description">Choose a publish URL from the list</string>
+    <string name="publish_start">Start</string>
+    <string name="publish_stop">Stop</string>
 </resources>

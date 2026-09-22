@@ -1,13 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Landscape, two columns: the readout on the left, and on the right the controls with the
+    aircraft's picture beneath them.
+
+    The readout gets a column of its own because it is the part that grows. With the controls
+    stacked above it, a TAP block and an Eco Mode notice pushed PUBLISH off the bottom of a
+    landscape phone. The controls and the video are fixed-size, and belong together anyway: the
+    URL names where the picture below it is going.
+
+    The video keeps a 16:9 box rather than filling its pane, because the downlink is 16:9 and a
+    stretched preview would misrepresent what is being published. Its height is whatever the
+    controls leave, and its width follows from that; the readout takes the rest of the width.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#101214">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <!--
+        Scrollable, because the readout is not a fixed size. An Eco Mode notice adds several lines
+        at the top, and PUBLISH, at the bottom, is the section the user is most likely to be
+        looking for.
+
+        fillViewport keeps the text top-aligned when it is shorter than the pane, so the normal
+        case does not float in the middle of the column.
+    -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="12dp"
+        android:fillViewport="true"
+        android:scrollbars="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/preview">
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:lineSpacingExtra="3dp"
+            android:textColor="#C7CDD4"
+            android:textSize="12sp" />
+
+    </ScrollView>
+
+    <!-- As wide as the video beneath it, so the right column reads as one block. -->
+    <LinearLayout
+        android:id="@+id/controls"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/hello_world"
-        android:textSize="24sp" />
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="@id/preview"
+        app:layout_constraintEnd_toEndOf="@id/preview">
 
-</FrameLayout>
+        <!--
+            Monospace and textUri, like every address in this app, so a mistyped digit in an IP is
+            visible rather than kerned away.
+
+            flagNoExtractUi is not optional on this screen. A landscape phone is short enough that
+            the IME decides the app cannot be seen anyway and switches to its full-screen "extract"
+            editor – one giant text box and a keyboard, with the preview and the status column gone
+            entirely.
+        -->
+        <EditText
+            android:id="@+id/url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:hint="@string/publish_url_hint"
+            android:imeOptions="actionGo|flagNoExtractUi"
+            android:inputType="textUri"
+            android:maxLines="1"
+            android:textColor="#E6E9EC"
+            android:textColorHint="#5A6068"
+            android:textSize="12sp"
+            android:autofillHints="" />
+
+        <!-- Choose first, review or edit the URL above, then Start. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+
+            <!--
+                A separate, finger-sized button rather than a dropdown on the field itself: it opens
+                the complete list without focusing the editor, so picking a server never raises the
+                keyboard over a landscape screen that has no room for it.
+            -->
+            <Button
+                android:id="@+id/select_url"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:minHeight="48dp"
+                android:text="@string/publish_select"
+                android:contentDescription="@string/publish_select_description"
+                android:drawableEnd="@drawable/ic_dropdown" />
+
+            <!--
+                One button, not two: Start and Stop are the same control in its two states, so there
+                is never a disabled half of a pair to read past.
+            -->
+            <Button
+                android:id="@+id/publish_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="48dp"
+                android:text="@string/publish_start" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!--
+        No android:background here, and that is load-bearing rather than an omission.
+
+        A SurfaceView does not draw its video into the view hierarchy. The SDK's decoder renders
+        into a separate compositor layer *behind* the app window, and the window is punched
+        transparent over the view's rectangle so that layer shows through. A background, though, is
+        drawn by the view itself, inside the window, which is to say directly into that hole. An
+        opaque one therefore covers the video completely: the panel is solid black while frames
+        arrive and composite normally. Observed exactly that way on the Galaxy S21, with the Mini 4
+        Pro connected and 9.57 Mb/s of H.264 being decoded behind a black rectangle.
+
+        Nothing is lost by dropping it. The letterbox bars CENTER_INSIDE leaves are already black,
+        because the layer behind the hole is cleared to black.
+
+        "W,16:9" derives the width from the height, which is the space below the controls: in
+        landscape the height is the scarce dimension. The start constraint only bounds it; with a
+        bias of 1 it hugs the end edge and the readout takes whatever width is left.
+    -->
+    <SurfaceView
+        android:id="@+id/preview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintDimensionRatio="W,16:9"
+        app:layout_constraintTop_toBottomOf="@id/controls"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="1" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

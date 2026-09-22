@@ -1,16 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+      Declared here even though the MSDK aircraft AAR merges it in too. This app opens its own
+      sockets to a media server, so INTERNET is its own requirement; leaving it to a dependency's
+      manifest would make publishing break silently if that dependency ever changed. It is a normal
+      permission, granted at install time with no runtime request.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:allowBackup="true"
+        android:name=".DemoApplication"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App">
+        android:theme="@style/Theme.SrsDjiDemo"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:usesCleartextTraffic">
+
+        <!-- Filled in from AIRCRAFT_API_KEY by the manifestPlaceholder in app/build.gradle. -->
+        <meta-data
+            android:name="com.dji.sdk.API_KEY"
+            android:value="${API_KEY}" />
+
+        <!--
+          Locked to landscape. The screen is a 16:9 video panel with a status column beside it, and
+          the aircraft downlink is landscape. Fixing the orientation here rather than calling
+          setRequestedOrientation() means the Activity is created landscape once, so there is no
+          rotation config change to survive – which matters because a rotation would destroy and
+          recreate the SurfaceView the SDK is decoding into.
+
+          stateAlwaysHidden because the URL field is the first focusable view and would otherwise
+          open the keyboard on every launch; adjustNothing because resizing the layout for the
+          keyboard would squeeze the video panel instead of simply covering the bottom of it.
+        -->
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

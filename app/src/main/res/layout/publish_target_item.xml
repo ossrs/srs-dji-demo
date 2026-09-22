@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    One row of the URL picker. Monospace and two lines, because these are addresses: a WHIP URL with
+    its query string does not fit one line at this width, and truncating it to the middle of the host
+    would make two servers indistinguishable.
+-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:viewBindingIgnore="true"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="48dp"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:fontFamily="monospace"
+    android:textSize="12sp"
+    android:maxLines="2"
+    android:ellipsize="end" />

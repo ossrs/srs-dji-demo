@@ -2,6 +2,51 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+/**
+ * The DJI App Key, resolved without ever putting a real one in this repository.
+ *
+ * This repo is public, so the key cannot live in a tracked file: a key committed once stays in the
+ * public history forever and the only remedy is regenerating it in DJI's Developer Center. The
+ * tracked `gradle.properties` therefore carries a placeholder, and a builder overrides it in
+ * `local.properties`, which is gitignored.
+ *
+ * A key is bound to the package name it was issued against, so a cloner cannot reuse this app's
+ * key anyway -- request one for your own applicationId.
+ */
+def djiAppKey = {
+    def local = rootProject.file('local.properties')
+    if (local.exists()) {
+        def props = new Properties()
+        local.withInputStream { props.load(it) }
+        def fromLocal = props.getProperty('AIRCRAFT_API_KEY')
+        if (fromLocal?.trim()) return fromLocal.trim()
+    }
+    return project.findProperty('AIRCRAFT_API_KEY')?.toString()?.trim() ?: ''
+}()
+
+/**
+ * The host the built-in publish URLs point at, resolved the same way as the App Key.
+ *
+ * A developer's SRS address is their own LAN detail, so it is set in gitignored `local.properties`
+ * and never committed:
+ *
+ *     PUBLISH_HOST=192.168.1.100
+ *
+ * Unset, it falls back to loopback, which is deliberately useless rather than someone else's
+ * machine: from the phone 127.0.0.1 is the phone itself, so the defaults fail fast and obviously
+ * instead of silently trying to reach an address that means nothing to whoever cloned this.
+ */
+def publishHost = {
+    def local = rootProject.file('local.properties')
+    if (local.exists()) {
+        def props = new Properties()
+        local.withInputStream { props.load(it) }
+        def fromLocal = props.getProperty('PUBLISH_HOST')
+        if (fromLocal?.trim()) return fromLocal.trim()
+    }
+    return project.findProperty('PUBLISH_HOST')?.toString()?.trim() ?: '127.0.0.1'
+}()
+
 android {
     namespace 'io.ossrs.djidemo'
     compileSdk 36
@@ -9,11 +54,48 @@ android {
     defaultConfig {
         applicationId 'io.ossrs.djidemo'
         minSdk 24
-        // Target API 36: required for new Google Play apps since 2026-08-31.
+        // Target API 36: required for new Google Play apps since 2026-08-31. This demo is never
+        // distributed through Play, but matching the paid app keeps one toolchain for both.
         targetSdk 36
-        versionCode 1
+        versionCode 3
         // Keep the displayed patch number aligned with versionCode (William's convention).
-        versionName "1.0.1"
+        versionName "1.0.3"
+
+        // The manifest picks this up as ${API_KEY}. Both halves are required: with only one of
+        // them the key silently never reaches the APK and registration fails at runtime with an
+        // error that looks like a cable or pairing fault rather than a missing key.
+        manifestPlaceholders["API_KEY"] = djiAppKey
+
+        // Reaches PublishTargets.DEFAULTS as BuildConfig.PUBLISH_HOST. See publishHost above.
+        buildConfigField "String", "PUBLISH_HOST", "\"${publishHost}\""
+
+        ndk {
+            // The MSDK aircraft AAR ships arm64-v8a only. Without this the APK also carries empty
+            // ABI directories and grows for no reason.
+            //noinspection ChromeOsAbiSupport
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+        viewBinding true
+    }
+
+    packaging {
+        jniLibs {
+            // Extract the native libraries at install time instead of mapping them out of the APK.
+            // The MSDK AAR asks for this in its own manifest (extractNativeLibs="true"), but AGP
+            // defaults useLegacyPackaging to false and silently wins the merge -- leaving the
+            // hardened loader to map .so files it expects to find on the filesystem.
+            useLegacyPackaging = true
+
+            // The MSDK is a hardened build: its .so files are signed/checksummed by the same
+            // shell-protection layer that decrypts the SDK classes, so anything that rewrites them
+            // breaks the loader. DJI's sample lists ~30 libraries under doNotStrip for this
+            // reason; the wildcard is the same guarantee with no list to keep in sync.
+            keepDebugSymbols += "**/*.so"
+        }
     }
 
     compileOptions {
@@ -23,6 +105,19 @@ android {
 }
 
 dependencies {
+    // MSDK V5, at the version DJI's own sample is verified against. The pair is not optional and
+    // the scopes are not interchangeable: '-provided' is a stub jar that exists only to compile
+    // against and is stripped from the APK, while the real implementation ships encrypted inside
+    // the aircraft AAR and is decrypted at startup. See DemoApplication.attachBaseContext.
+    compileOnly 'com.dji:dji-sdk-v5-aircraft-provided:5.18.0'
+    implementation 'com.dji:dji-sdk-v5-aircraft:5.18.0'
+
     implementation libs.androidx.appcompat
+    implementation libs.androidx.constraintlayout
     implementation libs.androidx.core.ktx
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.material
+
+    testImplementation libs.junit
 }
